@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log in | Macclesfield Tamil Sangam</title>
+<meta name="description" content="Macclesfield Tamil Sangam – bringing the Tamil community of Macclesfield and Cheshire together through culture, language, festivals and friendship.">
+<link rel="icon" href="/assets/img/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="/assets/img/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Tamil:wght@500;700&family=Noto+Sans+Tamil:wght@400;500;600&family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-title="loginTitle">
+<div id="site-header"></div>
+<main>
+<section class="page-head" id="pageHead" style="--bg:url('/assets/img/photos/temple-gateway-hd.jpg')">
+  <div class="wrap"><h1 data-t="loginTitle"></h1><p data-t="loginLead"></p></div>
+</section>
+<section>
+  <div class="wrap" style="max-width:520px">
+    <form class="box" id="loginForm" novalidate>
+      <h3 data-t="logIn"></h3>
+      <label for="le" data-t="fEmail"></label><input id="le" type="email" required autocomplete="email">
+      <label for="lw" data-t="password"></label><input id="lw" type="password" required autocomplete="current-password">
+      <button class="btn" type="submit" id="lbtn" data-t="logIn"></button>
+      <div class="form-msg hidden" id="lmsg" role="status"></div>
+      <p style="margin-top:16px;font-size:.92rem"><a class="link" href="#" id="forgotLink" data-t="forgot"></a></p>
+      <p style="margin-top:6px;font-size:.92rem"><span data-t="noAccount"></span> <a class="link" href="join.html" data-t="join"></a></p>
+    </form>
+  </div>
+</section>
+</main>
+<div id="site-footer"></div>
+<script src="assets/js/config.js"></script>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/core.js"></script>
+<script src="assets/js/pages/login.js"></script>
+</body>
+</html>
