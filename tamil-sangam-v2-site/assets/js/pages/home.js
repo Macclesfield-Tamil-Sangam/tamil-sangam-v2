@@ -43,6 +43,10 @@
   }
   onLang(render);
 
+  /* heritage photo strip opens in the photo viewer */
+  const hb = [...document.querySelectorAll('#heritage button')];
+  hb.forEach(b => b.onclick = () => MTS.openLightbox(hb.map(x => ({ src: x.querySelector('img').src, caption: x.querySelector('img').alt })), +b.dataset.i));
+
   Promise.all([
     db(`events?select=*&is_published=eq.true&starts_at=gte.${now}&order=starts_at.asc&limit=3`),
     db(`events?select=*&is_published=eq.true&starts_at=lt.${now}&order=starts_at.desc&limit=3`),

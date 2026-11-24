@@ -10,6 +10,12 @@
   const toLocalInput = iso => { if (!iso) return ''; const d = new Date(iso), p = n => String(n).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`; };
   const fromLocalInput = v => v ? new Date(v).toISOString() : null;
   const pounds = p => (p / 100).toFixed(2);
+  const bookingState = e => {
+    const now = new Date().toISOString();
+    if (!e.registration_open || e.starts_at < now || (e.booking_closes_at && e.booking_closes_at < now)) return 'closed';
+    if (e.booking_opens_at && e.booking_opens_at > now) return 'soon';
+    return 'open';
+  };
   const evName = e => `${esc(e.title_en)} · ${fmtDate(e.starts_at)}`;
 
   async function loadEvents() { events = await api('events?select=*&order=starts_at.desc'); }
@@ -51,7 +57,7 @@
         <td>${fmtDate(e.starts_at)}${e.starts_at < now ? ' <span class="pill">past</span>' : ''}</td>
         <td><b>${esc(e.title_en)}</b><br><small style="color:var(--muted)">${esc(e.title_ta || '')}</small></td>
         <td>${e.is_published ? '<span class="pill approved">Published</span>' : '<span class="pill pending">Hidden</span>'}</td>
-        <td>${e.registration_open ? '<span class="pill approved">Open</span>' : '<span class="pill">Closed</span>'}</td>
+        <td>${bookingState(e) === 'open' ? '<span class="pill approved">Open</span>' : bookingState(e) === 'soon' ? `<span class="pill pending">Opens ${fmtDate(e.booking_opens_at)}</span>` : '<span class="pill">Closed</span>'}${e.booking_closes_at && bookingState(e) !== 'closed' ? `<br><small style="color:var(--muted)">until ${fmtDate(e.booking_closes_at)}</small>` : ''}</td>
         <td style="white-space:nowrap"><button class="btn sm plain" data-edit="${e.id}">Edit</button>
           <a class="btn sm plain" href="/event.html?e=${encodeURIComponent(e.slug)}" target="_blank" rel="noopener">View</a></td></tr>`).join('') || '<tr><td colspan="5">No events yet.</td></tr>'}
       </tbody></table></div>`;
@@ -73,14 +79,16 @@
         <div><label>Title (தமிழ்)</label><input id="e_tta" value="${esc(ev ? ev.title_ta || '' : '')}"></div></div>
       <div class="row"><div><label>Description (English)</label><textarea id="e_den">${esc(ev ? ev.description_en || '' : '')}</textarea></div>
         <div><label>Description (தமிழ்)</label><textarea id="e_dta">${esc(ev ? ev.description_ta || '' : '')}</textarea></div></div>
-      <div class="row"><div><label>Starts *</label><input id="e_st" type="datetime-local" required value="${toLocalInput(ev && ev.starts_at)}"></div>
-        <div><label>Ends</label><input id="e_en" type="datetime-local" value="${toLocalInput(ev && ev.ends_at)}"></div></div>
+      <div class="row"><div><label>Event starts * <small style="color:var(--muted)">(when the event begins)</small></label><input id="e_st" type="datetime-local" required value="${toLocalInput(ev && ev.starts_at)}"></div>
+        <div><label>Event ends <small style="color:var(--muted)">(optional)</small></label><input id="e_en" type="datetime-local" value="${toLocalInput(ev && ev.ends_at)}"></div></div>
       <div class="row"><div><label>Venue</label><input id="e_ve" value="${esc(ev ? ev.venue || '' : '')}" placeholder="e.g. Macclesfield Town Hall"></div>
         <div><label>Web address name</label><input id="e_sl" value="${esc(ev ? ev.slug : '')}" placeholder="made from the title automatically"></div></div>
       <label>Cover photo ${ev && ev.cover_url ? '(current photo kept unless you choose a new one)' : '(optional)'}</label>
       <input id="e_cv" type="file" accept="image/*">
       <label class="check"><input type="checkbox" id="e_pub" ${ev && ev.is_published ? 'checked' : ''}> Published (visible on the website)</label>
       <label class="check"><input type="checkbox" id="e_reg" ${ev && ev.registration_open ? 'checked' : ''}> Booking open (people can register / buy tickets)</label>
+      <div class="row"><div><label>Booking opens <small style="color:var(--muted)">(blank = straight away)</small></label><input id="e_bo" type="datetime-local" value="${toLocalInput(ev && ev.booking_opens_at)}"></div>
+        <div><label>Booking closes <small style="color:var(--muted)">(blank = when the event starts)</small></label><input id="e_bc" type="datetime-local" value="${toLocalInput(ev && ev.booking_closes_at)}"></div></div>
       <h3 style="margin-top:10px">Tickets</h3>
       <div id="tks">${tickets.map(tkRow).join('')}</div>
       <button type="button" class="btn sm plain" id="addTk">+ Add ticket type</button>
@@ -111,8 +119,11 @@
         slug, title_en: title, title_ta: $('#e_tta').value.trim() || null,
         description_en: $('#e_den').value.trim() || null, description_ta: $('#e_dta').value.trim() || null,
         starts_at: fromLocalInput(st), ends_at: fromLocalInput($('#e_en').value),
-        venue: $('#e_ve').value.trim() || null, is_published: $('#e_pub').checked, registration_open: $('#e_reg').checked
+        venue: $('#e_ve').value.trim() || null, is_published: $('#e_pub').checked, registration_open: $('#e_reg').checked,
+        booking_opens_at: fromLocalInput($('#e_bo').value), booking_closes_at: fromLocalInput($('#e_bc').value)
       };
+      if (row.booking_closes_at && row.booking_closes_at > row.starts_at) return toast(msg, 'Booking must close before the event starts.', false);
+      if (row.booking_opens_at && row.booking_closes_at && row.booking_opens_at >= row.booking_closes_at) return toast(msg, 'Booking opens must be before Booking closes.', false);
       btn.disabled = true; btn.textContent = 'Saving…';
       try {
         const file = $('#e_cv').files[0];

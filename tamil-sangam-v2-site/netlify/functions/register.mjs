@@ -2,7 +2,7 @@
 import { env, json, sb, userFromRequest, stripe, sendConfirmation, loadEventAndTicket } from '../lib/shared.mjs';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const KNOWN = ['BAD_QUANTITY', 'BAD_DETAILS', 'REGISTRATION_CLOSED', 'BAD_TICKET', 'SOLD_OUT'];
+const KNOWN = ['BAD_QUANTITY', 'BAD_DETAILS', 'REGISTRATION_CLOSED', 'BOOKING_NOT_OPEN', 'BAD_TICKET', 'SOLD_OUT'];
 
 export default async (req) => {
   if (req.method !== 'POST') return json(405, { error: 'METHOD_NOT_ALLOWED' });

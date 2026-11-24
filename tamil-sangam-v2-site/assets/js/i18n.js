@@ -84,6 +84,10 @@ window.TEXT = {
               ta: ["உறுப்பினர் சேர்க்கை விசாரணை", "வரவிருக்கும் நிகழ்வுகள்", "தன்னார்வப் பணி", "நிதியுதவி / ஆதரவு", "பிற"] },
 
 
+  heritageEyebrow: { en: "Our heritage", ta: "நம் மரபு" },
+  heritageTitle: { en: "A thousand years of Tamil art", ta: "ஆயிரம் ஆண்டுத் தமிழ்க் கலை" },
+  heritageLead: { en: "Carvings and Tamil inscriptions from the Thanjavur Big Temple — the culture we celebrate together.", ta: "தஞ்சைப் பெரிய கோயிலின் சிற்பங்களும் தமிழ்க் கல்வெட்டுகளும் — நாம் ஒன்றாகக் கொண்டாடும் பண்பாடு." },
+
   /* accounts & membership */
   logIn: { en: "Log in", ta: "உள்நுழை" },
   logOut: { en: "Log out", ta: "வெளியேறு" },
@@ -141,6 +145,9 @@ window.TEXT = {
   booking: { en: "Booking…", ta: "முன்பதிவு செய்கிறது…" },
   bookedFree: { en: "You're registered! A confirmation has been sent to your email.", ta: "பதிவு செய்யப்பட்டது! உறுதிப்படுத்தல் உங்கள் மின்னஞ்சலுக்கு அனுப்பப்பட்டது." },
   soldOutMsg: { en: "Sorry, there aren't enough places left for that ticket.", ta: "மன்னிக்கவும், அந்த டிக்கெட்டுக்குப் போதுமான இடங்கள் இல்லை." },
+  bookingOpensOn: { en: "Booking opens on", ta: "முன்பதிவு தொடங்கும் நாள்:" },
+  bookingClosesOn: { en: "Booking closes on", ta: "முன்பதிவு முடியும் நாள்:" },
+  notOpenMsg: { en: "Booking for this event hasn't opened yet.", ta: "இந்த நிகழ்வுக்கான முன்பதிவு இன்னும் தொடங்கவில்லை." },
   closedMsg: { en: "Sorry, registration for this event has closed.", ta: "மன்னிக்கவும், இந்த நிகழ்வுக்கான பதிவு முடிந்தது." },
   securePay: { en: "Card payments are handled securely by Stripe.", ta: "அட்டைப் பணப்பரிமாற்றம் Stripe மூலம் பாதுகாப்பாகக் கையாளப்படுகிறது." },
   bookingDoneTitle: { en: "Thank you!", ta: "நன்றி!" },

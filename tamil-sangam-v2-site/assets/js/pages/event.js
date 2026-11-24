@@ -31,11 +31,15 @@
         return `<div class="ticket"><div>${esc(tr(tk, 'name'))}${a && a.remaining != null && !soldOut ? `<small>${a.remaining} ${t('left')}</small>` : ''}</div>
           <b>${soldOut ? t('soldOut') : money(tk.price_pence)}</b></div>`;
       }).join('') : '';
-      const open = ev.registration_open && tickets.length && window.MTS_AUTH;
+      const nowIso = new Date().toISOString();
+      const notYet = ev.booking_opens_at && ev.booking_opens_at > nowIso;
+      const closedEarly = ev.booking_closes_at && ev.booking_closes_at < nowIso;
+      const open = ev.registration_open && tickets.length && window.MTS_AUTH && !notYet && !closedEarly;
       const avail1 = tickets.filter(tk => !(avail[tk.id] && avail[tk.id].remaining === 0));
       if (open && avail1.length) {
         ticketHtml += `<form class="book-form" id="bookForm" novalidate>
           <h3 style="margin-top:18px">${t('bookTitle')}</h3>
+          ${ev.booking_closes_at ? `<p class="note" style="margin:0 0 12px">⏳ ${t('bookingClosesOn')} ${fmtDate(ev.booking_closes_at)}, ${fmtTime(ev.booking_closes_at)}</p>` : ''}
           <div class="row">
             <div><label for="bt">${t('ticketType')}</label><select id="bt">${avail1.map(tk => `<option value="${tk.id}">${esc(tr(tk, 'name'))} — ${money(tk.price_pence)}</option>`).join('')}</select></div>
             <div><label for="bq">${t('quantity')}</label><select id="bq">${[1,2,3,4,5,6,7,8,9,10].map(n => `<option>${n}</option>`).join('')}</select></div>
@@ -48,6 +52,10 @@
           <div class="form-msg hidden" id="bmsg" role="status"></div>
           <p class="note" id="bsecure" style="margin-top:10px">🔒 ${t('securePay')}</p>
         </form>`;
+      } else if (ev.registration_open && tickets.length && notYet) {
+        ticketHtml += `<div class="note">📅 ${t('bookingOpensOn')} ${fmtDate(ev.booking_opens_at)}, ${fmtTime(ev.booking_opens_at)}</div>`;
+      } else if (ev.registration_open && tickets.length && closedEarly) {
+        ticketHtml += `<div class="note">${t('closedMsg')} <a class="link" href="/contact.html">${t('contact')} →</a></div>`;
       } else if (!(ev.registration_open && tickets.length)) {
         ticketHtml += `<div class="note">${t('regClosed')} <a class="link" href="/contact.html">${t('contact')} →</a></div>`;
       }
@@ -100,7 +108,7 @@
           btn.textContent = label;
         } catch (err) {
           console.error(err);
-          show(err.code === 'SOLD_OUT' ? t('soldOutMsg') : err.code === 'REGISTRATION_CLOSED' ? t('closedMsg') : t('fError'));
+          show(err.code === 'SOLD_OUT' ? t('soldOutMsg') : err.code === 'REGISTRATION_CLOSED' ? t('closedMsg') : err.code === 'BOOKING_NOT_OPEN' ? t('notOpenMsg') : t('fError'));
           btn.disabled = false; btn.textContent = label;
         }
       };
