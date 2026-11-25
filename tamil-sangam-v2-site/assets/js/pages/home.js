@@ -11,7 +11,7 @@
       <div class="slide bg${i % 4} ${s.image ? 'has-photo' : ''} ${i === cur ? 'on' : ''}">
         ${s.image ? `<img class="slide-photo" src="${MTS.esc(s.image)}" alt="" ${i ? 'loading="lazy"' : ''}>` : KOLAM}
         <div class="wrap"><h1>${MTS.esc(L(s.title))}</h1><p>${MTS.esc(L(s.text))}</p>
-          <a href="/events.html" class="btn">${t('seeEvents')}</a><a href="/contact.html" class="btn ghost">${t('joinUs')}</a></div>
+          <a href="/events.html" class="btn">${t('seeEvents')}</a><a href="/join.html" class="btn ghost">${t('joinNow')}</a></div>
       </div>`).join('');
     $('#dots').innerHTML = CFG.slides.map((_, i) => `<button class="${i === cur ? 'on' : ''}" aria-label="Slide ${i + 1}"></button>`).join('');
     [...$('#dots').children].forEach((b, i) => b.onclick = () => show(i));

@@ -11,7 +11,7 @@ Do these in order. Each step says where to click.
 ## 2. Database (Supabase)
 1. Supabase → **SQL Editor → New query** → paste `supabase/02_members_and_tickets.sql` → **Run**.
    (`01_setup.sql` was already run earlier.)
-   Then run `supabase/03_booking_window.sql` the same way (adds booking opens / closes dates).
+   Then run `supabase/03_booking_window.sql` (booking opens / closes dates) and `supabase/04_event_videos.sql` (YouTube videos) the same way.
 2. Supabase → **Authentication → URL Configuration**:
    - **Site URL:** your site address (step 1.4)
    - **Redirect URLs:** add `https://YOUR-SITE/**` (and later `https://macclesfieldtamilsangam.org.uk/**`)

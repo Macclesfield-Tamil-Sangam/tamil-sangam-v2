@@ -1,6 +1,6 @@
 /* Event detail page: /event.html?e=<slug> */
 (function () {
-  const { t, tr, esc, $, db, photoUrl, fmtDate, fmtTime, money, onLang, loadingBox, errorBox, openLightbox } = MTS;
+  const { t, tr, esc, $, db, photoUrl, fmtDate, fmtTime, money, onLang, loadingBox, errorBox, openLightbox, videoEmbeds } = MTS;
   const slug = new URLSearchParams(location.search).get('e') || decodeURIComponent(location.hash.slice(1));
   let ev = null, tickets = [], avail = {}, photos = [], state = 'loading', me = {};
 
@@ -67,6 +67,7 @@
       <div>
         ${cover ? `<div class="hero-img"><img src="${esc(cover)}" alt=""></div>` : ''}
         <p class="desc">${esc(tr(ev, 'description'))}</p>
+        ${videoEmbeds(ev.videos, tr(ev, 'title')) ? `<h2 class="sec-title" style="font-size:1.6rem;margin-top:36px">${t('eventVideos')}</h2>${videoEmbeds(ev.videos, tr(ev, 'title'))}` : ''}
         ${photos.length ? `<h2 class="sec-title" style="font-size:1.6rem;margin-top:36px">${t('eventPhotos')}</h2>
           <div class="gal-grid" id="evPhotos">${photos.map((p, i) => `<button data-i="${i}" aria-label="${t('eventPhotos')} ${i + 1}"><img src="${esc(photoUrl(p.storage_path))}" alt="${esc(tr(p, 'caption'))}" loading="lazy"></button>`).join('')}</div>` : ''}
       </div>

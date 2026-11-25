@@ -3,6 +3,8 @@
   const { t, $ } = MTS, A = MTS_AUTH;
   if (A.session) location.replace('/account.html');
   const msg = $('#lmsg'), btn = $('#lbtn');
+  const pre = new URLSearchParams(location.search).get('email');
+  if (pre) { $('#le').value = pre; setTimeout(() => $('#lw').focus(), 50); }
   const show = (text, ok) => { msg.textContent = text; msg.className = 'form-msg ' + (ok ? 'ok' : 'err'); };
   const authErr = sessionStorage.getItem('mts-auth-error');
   if (authErr) { show(authErr); sessionStorage.removeItem('mts-auth-error'); }

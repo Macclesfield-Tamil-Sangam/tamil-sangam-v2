@@ -83,6 +83,8 @@
         <div><label>Event ends <small style="color:var(--muted)">(optional)</small></label><input id="e_en" type="datetime-local" value="${toLocalInput(ev && ev.ends_at)}"></div></div>
       <div class="row"><div><label>Venue</label><input id="e_ve" value="${esc(ev ? ev.venue || '' : '')}" placeholder="e.g. Macclesfield Town Hall"></div>
         <div><label>Web address name</label><input id="e_sl" value="${esc(ev ? ev.slug : '')}" placeholder="made from the title automatically"></div></div>
+      <label>YouTube videos <small style="color:var(--muted)">(paste one link per line — e.g. https://youtu.be/…)</small></label>
+      <textarea id="e_vid" style="min-height:80px" placeholder="https://www.youtube.com/watch?v=...">${esc(ev && ev.videos ? ev.videos.join('\n') : '')}</textarea>
       <label>Cover photo ${ev && ev.cover_url ? '(current photo kept unless you choose a new one)' : '(optional)'}</label>
       <input id="e_cv" type="file" accept="image/*">
       <label class="check"><input type="checkbox" id="e_pub" ${ev && ev.is_published ? 'checked' : ''}> Published (visible on the website)</label>
@@ -122,6 +124,10 @@
         venue: $('#e_ve').value.trim() || null, is_published: $('#e_pub').checked, registration_open: $('#e_reg').checked,
         booking_opens_at: fromLocalInput($('#e_bo').value), booking_closes_at: fromLocalInput($('#e_bc').value)
       };
+      const vidLines = $('#e_vid').value.split(/\s+/).map(v => v.trim()).filter(Boolean);
+      const badVid = vidLines.find(v => !MTS.ytId(v));
+      if (badVid) return toast(msg, 'This is not a YouTube link: ' + badVid, false);
+      if (vidLines.length || (ev && ev.videos && ev.videos.length)) row.videos = vidLines;
       if (row.booking_closes_at && row.booking_closes_at > row.starts_at) return toast(msg, 'Booking must close before the event starts.', false);
       if (row.booking_opens_at && row.booking_closes_at && row.booking_opens_at >= row.booking_closes_at) return toast(msg, 'Booking opens must be before Booking closes.', false);
       btn.disabled = true; btn.textContent = 'Saving…';

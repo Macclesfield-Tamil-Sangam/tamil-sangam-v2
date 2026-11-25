@@ -3,6 +3,7 @@
   const { t, tr, esc, $, fmtDate, money, onLang, loadingBox, errorBox } = MTS, A = MTS_AUTH;
   let prof = null, regs = [], state = 'loading';
   const stBadge = s => s === 'approved' ? `<span class="badge ok">${t('stApproved')}</span>` : s === 'rejected' ? `<span class="badge bad">${t('stRejected')}</span>` : `<span class="badge wait">${t('stPending')}</span>`;
+  const nameParts = n => { const p = String(n || '').trim().split(/\s+/); return [p.shift() || '', p.join(' ')]; };
   const regSt = { free: 'stFree', paid: 'stPaid', pending: 'stPendingPay', cancelled: 'stCancelled', refunded: 'stRefunded' };
 
   function render() {
@@ -14,13 +15,17 @@
       ${A.recovery ? `<form class="box" id="pwForm" style="margin-bottom:28px;border-color:var(--gold)">
           <h3>${t('setNewPassword')}</h3>
           <label for="np">${t('newPassword')} <small>(${t('passwordHint')})</small></label><input id="np" type="password" minlength="8" required autocomplete="new-password">
-          <button class="btn" type="submit">${t('save')}</button><div class="form-msg hidden" id="pwMsg"></div></form>` : ''}
+          <label for="np2">${t('confirmPassword')}</label><input id="np2" type="password" minlength="8" required autocomplete="new-password">
+          <button class="btn" type="submit" id="pwBtn">${t('savePassword')}</button><div class="form-msg hidden" id="pwMsg" role="status"></div></form>` : ''}
       <div class="acc-grid">
         <div>
           <form class="box" id="detForm">
             <h3>${t('myDetails')}</h3>
             <p style="margin-bottom:14px"><small style="color:var(--muted)">${t('membership')}</small><br>${stBadge(prof.status)}</p>
-            <label for="dn">${t('fullName')}</label><input id="dn" value="${esc(prof.full_name || '')}" required>
+            <div class="row">
+              <div><label for="dfn">${t('firstName')}</label><input id="dfn" value="${esc(nameParts(prof.full_name)[0])}" required autocomplete="given-name"></div>
+              <div><label for="dln">${t('lastName')}</label><input id="dln" value="${esc(nameParts(prof.full_name)[1])}" autocomplete="family-name"></div>
+            </div>
             <label for="dp">${t('fPhone')}</label><input id="dp" type="tel" value="${esc(prof.phone || '')}">
             <label>${t('fEmail')}</label><input value="${esc(prof.email || '')}" disabled>
             <button class="btn" type="submit">${t('save')}</button>
@@ -42,18 +47,28 @@
       e.preventDefault();
       const m = $('#detMsg');
       try {
-        await A.api(`profiles?id=eq.${prof.id}`, { method: 'PATCH', body: { full_name: $('#dn').value.trim(), phone: $('#dp').value.trim() }, headers: { Prefer: 'return=minimal' } });
-        prof.full_name = $('#dn').value.trim(); prof.phone = $('#dp').value.trim();
+        const full = [$('#dfn').value.trim(), $('#dln').value.trim()].filter(Boolean).join(' ');
+        if (!full) { m.textContent = t('nameNeeded'); m.className = 'form-msg err'; return; }
+        await A.api(`profiles?id=eq.${prof.id}`, { method: 'PATCH', body: { full_name: full, phone: $('#dp').value.trim() }, headers: { Prefer: 'return=minimal' } });
+        prof.full_name = full; prof.phone = $('#dp').value.trim();
         m.textContent = t('saved'); m.className = 'form-msg ok';
       } catch (err) { console.error(err); m.textContent = t('fError'); m.className = 'form-msg err'; }
     };
     $('#outBtn').onclick = async () => { await A.signOut(); location.href = '/'; };
     if ($('#pwForm')) $('#pwForm').onsubmit = async e => {
       e.preventDefault();
-      const m = $('#pwMsg'), pw = $('#np').value;
+      const m = $('#pwMsg'), pw = $('#np').value, pw2 = $('#np2').value;
       if (pw.length < 8) { m.textContent = t('weakPassword'); m.className = 'form-msg err'; return; }
-      try { await A.setPassword(pw); m.textContent = t('passwordChanged'); m.className = 'form-msg ok'; }
-      catch (err) { console.error(err); m.textContent = t('fError'); m.className = 'form-msg err'; }
+      if (pw !== pw2) { m.textContent = t('passwordsDontMatch'); m.className = 'form-msg err'; $('#np2').focus(); return; }
+      $('#pwBtn').disabled = true;
+      try {
+        await A.setPassword(pw);
+        $('#pwForm').innerHTML = `<h3>✅ ${t('passwordChanged')}</h3><p style="color:var(--muted)">${t('passwordChangedHelp')}</p>`;
+        $('#pwForm').style.borderColor = '#bfe3cb'; $('#pwForm').style.background = '#eaf6ee';
+      } catch (err) {
+        console.error(err); $('#pwBtn').disabled = false;
+        m.textContent = /different|same/i.test(err.message) ? t('samePassword') : t('fError'); m.className = 'form-msg err';
+      }
     };
   }
   onLang(render);

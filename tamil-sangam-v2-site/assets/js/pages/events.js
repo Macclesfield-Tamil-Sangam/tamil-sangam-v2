@@ -7,7 +7,7 @@
     if (failed) return box.innerHTML = errorBox();
     if (!rows) return box.innerHTML = loadingBox();
     box.innerHTML = rows.length ? rows.map(e => eventCard(e, { upcoming: true })).join('')
-      : `<div class="state empty">${t('noUpcoming')}<br><br><a class="btn outline" href="/past-events.html">${t('pastEvents')}</a></div>`;
+      : `<div class="state empty">${t('noUpcoming')}<br><br><a class="btn outline" href="/past-events.html">${t('memories')}</a></div>`;
   }
   onLang(render);
   db(`events?select=*&is_published=eq.true&starts_at=gte.${new Date().toISOString()}&order=starts_at.asc`)

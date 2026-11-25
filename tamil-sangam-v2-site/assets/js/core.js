@@ -38,6 +38,17 @@
   }
   const photoUrl = p => !p ? '' : /^https?:\/\//.test(p) ? p : `${CFG.supabaseUrl}/storage/v1/object/public/photos/${p.split('/').map(encodeURIComponent).join('/')}`;
 
+  /* ---------- YouTube videos ---------- */
+  const ytId = url => {
+    const m = String(url || '').match(/(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/))([A-Za-z0-9_-]{11})/);
+    return m ? m[1] : null;
+  };
+  const videoEmbeds = (urls, title) => {
+    const ids = (urls || []).map(ytId).filter(Boolean);
+    if (!ids.length) return '';
+    return `<div class="video-grid">${ids.map(id => `<div class="video"><iframe src="https://www.youtube-nocookie.com/embed/${id}" title="${esc(title || 'Video')}" loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>`).join('')}</div>`;
+  };
+
   /* ---------- icons ---------- */
   const ICON = {
     phone: '<svg viewBox="0 0 24 24"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z"/></svg>',
@@ -68,9 +79,9 @@
   const socialIcons = () => channels().map(c => `<a href="${esc(c.url)}"${ext(c.url)} aria-label="${esc(c.label)}" title="${esc(c.label)}">${ICON[c.k]}</a>`).join('');
 
   /* ---------- header & footer ---------- */
-  const NAV = [['/', 'home'], ['/about.html', 'about'], ['/events.html', 'events'], ['/past-events.html', 'pastEvents'], ['/gallery.html', 'gallery'], ['/contact.html', 'contact']];
+  const NAV = [['/', 'home'], ['/about.html', 'about'], ['/events.html', 'events'], ['/past-events.html', 'memories'], ['/contact.html', 'contact']];
   const page = (location.pathname.split('/').pop() || 'index').replace(/\.html$/, '');
-  const isHere = href => { const h = (href.split('/').pop() || 'index').replace(/\.html$/, ''); return h === page || (page === 'event' && h === 'events'); };
+  const isHere = href => { const h = (href.split('/').pop() || 'index').replace(/\.html$/, ''); return h === page || (page === 'event' && h === 'events') || (page === 'gallery' && h === 'past-events'); };
 
   function renderChrome() {
     const top = $('#site-header'), foot = $('#site-footer');
@@ -198,6 +209,26 @@
   function openLightbox(list, i) { ensureLightbox(); lbList = list; $('#lb').classList.add('open'); showLb(i); }
   function closeLightbox() { $('#lb').classList.remove('open'); }
 
-  window.MTS = { CFG, L, O, t, tr, esc, $, $$, db, photoUrl, fmtDate, fmtMonthYear, fmtTime, yearOf, money, ICON, KOLAM, channels, ext, onLang, renderAll, loadingBox, errorBox, eventCard, openLightbox, get lang() { return lang; } };
+  /* ---------- show / hide password (eye button) ---------- */
+  const EYE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5C6.5 5 2.7 9.1 1.5 12c1.2 2.9 5 7 10.5 7s9.3-4.1 10.5-7C21.3 9.1 17.5 5 12 5zm0 11.5A4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 0 1 0 9zm0-7a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z"/></svg>';
+  const EYE_OFF = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.3 2.3 2 3.6l3.2 3.2C3.4 8.3 2.1 10.2 1.5 12c1.2 2.9 5 7 10.5 7 2 0 3.8-.5 5.3-1.4l3.1 3.1 1.3-1.3L3.3 2.3zM12 16.5A4.5 4.5 0 0 1 7.5 12c0-.8.2-1.5.5-2.1l1.5 1.5a2.5 2.5 0 0 0 3.1 3.1l1.5 1.5c-.6.3-1.3.5-2.1.5zm0-11.5c5.5 0 9.3 4.1 10.5 7-.5 1.3-1.5 2.8-2.8 4.1l-3.2-3.2c.2-.6.3-1.2.3-1.9A4.5 4.5 0 0 0 12 7.5c-.7 0-1.3.1-1.9.3L7.9 5.6C9.2 5.2 10.5 5 12 5z"/></svg>';
+  function enhancePasswords(root = document) {
+    root.querySelectorAll('input[type="password"]:not([data-eye])').forEach(inp => {
+      inp.dataset.eye = '1';
+      const wrap = document.createElement('div'); wrap.className = 'pw-wrap';
+      inp.parentNode.insertBefore(wrap, inp); wrap.appendChild(inp);
+      const btn = document.createElement('button');
+      btn.type = 'button'; btn.className = 'pw-eye';
+      const set = shown => { inp.type = shown ? 'text' : 'password'; btn.innerHTML = shown ? EYE_OFF : EYE; btn.setAttribute('aria-label', t(shown ? 'hidePassword' : 'showPassword')); btn.setAttribute('aria-pressed', shown); };
+      btn.onclick = () => { set(inp.type === 'password'); inp.focus(); };
+      set(false); wrap.appendChild(btn);
+    });
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    enhancePasswords();
+    new MutationObserver(() => enhancePasswords()).observe(document.body, { childList: true, subtree: true });
+  });
+
+  window.MTS = { ytId, videoEmbeds, CFG, L, O, t, tr, esc, $, $$, db, photoUrl, fmtDate, fmtMonthYear, fmtTime, yearOf, money, ICON, KOLAM, channels, ext, onLang, renderAll, loadingBox, errorBox, eventCard, openLightbox, get lang() { return lang; } };
   document.addEventListener('DOMContentLoaded', renderAll);
 })();

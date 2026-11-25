@@ -29,7 +29,10 @@
     </div>
     <form class="box" id="joinForm" novalidate>
       <h3 data-t="createAccount"></h3>
-      <label for="jn" data-t="fullName"></label><input id="jn" required autocomplete="name">
+      <div class="row">
+        <div><label for="jf" data-t="firstName"></label><input id="jf" required autocomplete="given-name"></div>
+        <div><label for="jl" data-t="lastName"></label><input id="jl" required autocomplete="family-name"></div>
+      </div>
       <div class="row">
         <div><label for="je" data-t="fEmail"></label><input id="je" type="email" required autocomplete="email"></div>
         <div><label for="jp" data-t="fPhone"></label><input id="jp" type="tel" autocomplete="tel"></div>

@@ -81,7 +81,15 @@
     },
     async signUp(email, password, meta) {
       const redirect = encodeURIComponent(location.origin + '/account.html');
-      const d = await call('/auth/v1/signup?redirect_to=' + redirect, { method: 'POST', body: { email, password, data: meta } });
+      let d;
+      try { d = await call('/auth/v1/signup?redirect_to=' + redirect, { method: 'POST', body: { email, password, data: meta } }); }
+      catch (e) {
+        if (e.code === 'user_already_exists' || /already (been )?registered|already exists/i.test(e.message)) e.code = 'user_already_exists';
+        throw e;
+      }
+      /* with "Confirm email" on, Supabase hides existing accounts by returning a user with no identities */
+      const u = d && (d.user || d);
+      if (u && Array.isArray(u.identities) && u.identities.length === 0) throw Object.assign(new Error('User already registered'), { code: 'user_already_exists' });
       if (d && d.access_token) save(fromToken(d));       // email confirmation switched off
       return { needsConfirm: !(d && d.access_token) };
     },
